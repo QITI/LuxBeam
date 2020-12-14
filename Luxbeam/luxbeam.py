@@ -83,7 +83,7 @@ class Luxbeam(object):
     """
     def __init__(self, dmd_ip, inverse=False, timeout=None, jumbo_frame=False):
         self.UDP_PORT_MAIN = 52985
-        self.UDP_PORT_IMAGE = 52986
+        self.UDP_PORT_DATA = 52986
         self.DMD_IP = dmd_ip
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
@@ -109,7 +109,6 @@ class Luxbeam(object):
     @property
     def rows(self):
         return self._rows
-
 
     def recv_ack(self):
         """Receive the ack message from DMD. If the error_code is not zero, raise LuxbeamError.
@@ -213,7 +212,7 @@ class Luxbeam(object):
             bits = image[img_data_byte_num * (i - 1):img_data_byte_num * i]
             packet = message_size + message_id + seq_no + m_inum + offset + bits
 
-            self.socket.sendto(packet, (self.DMD_IP, self.UDP_PORT_IMAGE))
+            self.socket.sendto(packet, (self.DMD_IP, self.UDP_PORT_DATA))
 
             if delay:
                 time.sleep(delay)
