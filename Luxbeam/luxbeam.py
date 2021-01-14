@@ -28,7 +28,7 @@ _luxbeam_error_code = {
     10017: "Focus motor absolute position out of range.",
     10018: "Focus motor has not been set to mid position.",
     10019: "Focus motor measured distance never entered",
-    10020: "Mask file with invalifd format (not bmp, not 8-bit, etc)",
+    10020: "Mask file with invalid format (not bmp, not 8-bit, etc)",
     10021: "LED driver amplitude value out of range.",
     10022: "Temperature regulation setvalue out of range.",
     10023: "Focus motor step size conversion unit out of range",
@@ -237,6 +237,9 @@ class Luxbeam(object):
                 image = np.packbits(image).tobytes()
         else:
             raise TypeError("Image must be a string path to a .bin file or a numpy ndarray with bool dtype.")
+
+        if len(image) != self.cols * self._rows // 8:
+            raise ValueError("image size incorrect!")
 
         if self.inverse:
             image_inv = []
