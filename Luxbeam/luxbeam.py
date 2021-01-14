@@ -2,6 +2,7 @@ import socket
 import time
 import ipaddress
 import numpy as np
+import struct
 from .constants import *
 
 __all__ = ["Luxbeam", "LuxbeamError"]
@@ -85,10 +86,11 @@ class Luxbeam(object):
         self.UDP_PORT_MAIN = 52985
         self.UDP_PORT_DATA = 52986
         self.DMD_IP = dmd_ip
-        self.socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        self.socket_main = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        self.socket_data = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
         if timeout:
-            self.socket.settimeout(timeout)
+            self.socket_main.settimeout(timeout)
 
         self.inverse = inverse
         self.jumbo_frame = jumbo_frame
@@ -122,7 +124,7 @@ class Luxbeam(object):
             if error_code != 0:
                 raise LuxbeamError(error_code)
 
-    def send_packet(self, rec_id, payload=None):
+    def send_packet(self, rec_id, payload=None, use_data_port=False):
         """
 
         Parameters
@@ -134,12 +136,17 @@ class Luxbeam(object):
         tot_size = 4
         if payload:
             tot_size += len(payload)
-        message = tot_size.to_bytes(2, byteorder='big') + rec_id.to_bytes(2, byteorder='big')
+
+        message = struct.pack(">HH", tot_size, rec_id)
+
         if payload:
             message = message + payload
-        self.socket.sendto(message, (self.DMD_IP, self.UDP_PORT_MAIN))
 
-    def recv_packet(self):
+        socket = self.socket_data if use_data_port else self.socket_main
+        udp_port = self.UDP_PORT_DATA if use_data_port else self.UDP_PORT_MAIN
+        socket.sendto(message, (self.DMD_IP, udp_port))
+
+    def recv_packet(self, use_data_port=False):
         """Receive the packet from the Luxbeam.
 
         Returns
@@ -147,10 +154,10 @@ class Luxbeam(object):
         rec_id: int
         payload: bytes
         """
+        socket = self.socket_data if use_data_port else self.socket_main
 
-        data, address = self.socket.recvfrom(1024)
-        tot_size = int.from_bytes(data[0:2], byteorder='big')
-        rec_id = int.from_bytes(data[2:4], byteorder='big')
+        data, address = socket.recvfrom(1024)
+        tot_size, rec_id = struct.unpack(">HH", data[0:4])
         payload = data[4:] if tot_size > 4 else None
         return rec_id, payload
 
@@ -180,11 +187,7 @@ class Luxbeam(object):
         self.send_packet(315)
         rec_id, payload = self.recv_packet()
         assert rec_id == 515
-        dmd_type = int.from_bytes(payload[0:2], byteorder='big')
-        blocks = int.from_bytes(payload[2:4], byteorder='big')
-        cols = int.from_bytes(payload[4:6], byteorder='big')
-        rows = int.from_bytes(payload[6:8], byteorder='big')
-        rows_pr_block = int.from_bytes(payload[8:10], byteorder='big')
+        dmd_type, blocks, cols, rows, rows_pr_block = struct.unpack(">HHHHH", payload)
         return dmd_type, blocks, cols, rows, rows_pr_block
 
     def _send_image_packets(self, start_seq_no, end_seq_no, inum, image, img_data_line_num, delay=None):
@@ -212,7 +215,8 @@ class Luxbeam(object):
             bits = image[img_data_byte_num * (i - 1):img_data_byte_num * i]
             packet = message_size + message_id + seq_no + m_inum + offset + bits
 
-            self.socket.sendto(packet, (self.DMD_IP, self.UDP_PORT_DATA))
+            # TODO: replace it with send_packet function
+            self.socket_main.sendto(packet, (self.DMD_IP, self.UDP_PORT_DATA))
 
             if delay:
                 time.sleep(delay)
@@ -262,6 +266,43 @@ class Luxbeam(object):
             else:
                 last_seq_no = payload[1:3]
                 self._send_image_packets(last_seq_no + 1, packet_num, inum, image, img_data_line_num, delay=delay)
+
+    def load_sequence(self, sequence_file):
+        if isinstance(sequence_file, str):
+            sequence_file = sequence_file.encode("ascii")
+
+        if not isinstance(sequence_file, bytes):
+            raise TypeError
+
+        payload_max_size = 8900 if self.jumbo_frame else 1490
+
+        tot_packet = len(sequence_file) // payload_max_size
+        residual = len(sequence_file) % payload_max_size
+
+        if residual > 0:
+            tot_packet += 1
+
+        assert tot_packet==1
+
+        for i in range(tot_packet):
+            start = i * payload_max_size
+            if i == tot_packet - 1 and residual > 0: # last packet is not full length
+                end = start + residual
+            else:
+                end = start + payload_max_size
+            self._load_sequence_packet(i + 1, tot_packet, sequence_file[start:end])
+        self.recv_ack()
+
+    def _load_sequence_packet(self, pkg_no, tot_pkg, data):
+        data_size = len(data)
+        payload = struct.pack(">HHH", pkg_no, tot_pkg, data_size) + data
+        self.send_packet(105, payload=payload)
+
+    def get_sequencer_file_error_log(self):
+        self.send_packet(307)
+        rec_id, payload = self.recv_packet()
+        assert rec_id == 507
+        return (payload[2:]).decode("ascii")
 
     def set_sequencer_state(self, seq_cmd, enable):
         """This function is used to manipulate the status of the sequencer in Luxbeam.

@@ -57,14 +57,17 @@ class LuxbeamSequencer(object):
         try:
             var = self.const_vars[value]
         except KeyError:
-            var = LuxbeamSequencerVariable(self, "ConstVar_{0}".format(value))
+            var = LuxbeamSequencerVariable(self, "ConstVar{0}".format(value))
             self.const_vars[value] = var
         return var
 
     def reset_global(self, wait_for=1):
         self.add_line("ResetGlobal", [str(wait_for)])
 
-    def assign_var(self, var, value=0, wait_for=1):
+    def assign_var(self, value=0, var=None, wait_for=1):
+        if var is None:
+            var = "Var{0}".format(self._var_counter())
+
         self.add_line("AssignVar", [var, str(value), str(wait_for)])
         var = LuxbeamSequencerVariable(self, var)
         return var
@@ -98,7 +101,7 @@ class LuxbeamSequencer(object):
         self.add_line("JumpIf", [var_a.var, operator, var_b.var, label, str(wait_for)])
 
     def trig(self, mode, source, timeout):
-        self.add_line("Jump", [str(mode), str(source), str(timeout)])
+        self.add_line("Trig", [str(mode), str(source), str(timeout)])
 
     def jump_loop_iter(self):
         return LuxbeamSequencerJumpLoopIterator(self)
@@ -133,7 +136,7 @@ class LuxbeamSequencerJumpLoopIterator(object):
         self.parent = parent
 
     def __iter__(self):
-        label = "Loop_{0}".format(self.parent._loop_counter())
+        label = "Loop{0}".format(self.parent._loop_counter())
         self.parent.label(label)
         yield label
         self.parent.jump(label)
@@ -150,7 +153,7 @@ class LuxbeamSequencerRangeLoopIterator(object):
 
     def __iter__(self):
         label = "Loop_{0}".format(self.parent._loop_counter())
-        var = self.parent.assign_var("Var_{0}".format(self.parent._var_counter()), self.start)
+        var = self.parent.assign_var(self.start)
         self.parent.label(label)
         yield label, var
         self.parent.add(var, 1)
