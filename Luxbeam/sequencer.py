@@ -1,5 +1,6 @@
 import io
 
+__all__ = ["LuxbeamSequencer", "LuxbeamSequencerVariable", ]
 
 class _Counter(object):
     def __init__(self):
@@ -22,6 +23,7 @@ class LuxbeamSequencer(object):
 
         self._loop_counter = _Counter()
         self._var_counter = _Counter()
+
 
     def __str__(self):
         return self.dumps()
@@ -72,6 +74,13 @@ class LuxbeamSequencer(object):
         var = LuxbeamSequencerVariable(self, var)
         return var
 
+    def assign_var_reg(self, regno=0, var=None,  wait_for=1):
+        if var is None:
+            var = "Var{0}".format(self._var_counter())
+        self.add_line("AssignVarReg", [var, str(regno), str(wait_for)])
+        var = LuxbeamSequencerVariable(self, var)
+        return var
+
     def load_global(self, inum, wait_for=400):
         if isinstance(inum, int):
             inum = self._assign_const_var(inum)
@@ -103,6 +112,9 @@ class LuxbeamSequencer(object):
     def trig(self, mode, source, timeout):
         self.add_line("Trig", [str(mode), str(source), str(timeout)])
 
+    def wait(self, value=1):
+        self.add_line("Wait", str(value))
+
     def jump_loop_iter(self):
         return LuxbeamSequencerJumpLoopIterator(self)
 
@@ -130,6 +142,15 @@ class LuxbeamSequencerVariable(object):
         self.var = var
         self.parent = parent
 
+    def __add__(self, other):
+        if isinstance(other, int):
+            r = self.parent.assign_var(other)
+            self.parent.add(r, self)
+            return r
+        else:
+            raise ValueError
+
+
 
 class LuxbeamSequencerJumpLoopIterator(object):
     def __init__(self, parent: LuxbeamSequencer):
@@ -144,8 +165,11 @@ class LuxbeamSequencerJumpLoopIterator(object):
 
 class LuxbeamSequencerRangeLoopIterator(object):
     def __init__(self, parent: LuxbeamSequencer, start=0, end=1, step=1):
-        if not end > start:
-            raise ValueError
+        if isinstance(start, LuxbeamSequencerVariable) or isinstance(end, LuxbeamSequencerVariable):
+            pass
+        else:
+            if not end > start:
+                raise ValueError
         self.parent = parent
         self.start = start
         self.end = end
@@ -153,8 +177,11 @@ class LuxbeamSequencerRangeLoopIterator(object):
 
     def __iter__(self):
         label = "Loop_{0}".format(self.parent._loop_counter())
-        var = self.parent.assign_var(self.start)
+        if isinstance(self.start, LuxbeamSequencerVariable):
+            var_start = self.start
+        else:
+            var_start = self.parent.assign_var(self.start)
         self.parent.label(label)
-        yield label, var
-        self.parent.add(var, 1)
-        self.parent.jump_if(var, '<', self.end, label, 1)
+        yield label, var_start
+        self.parent.add(var_start, 1)
+        self.parent.jump_if(var_start, '<', self.end, label, 1)
