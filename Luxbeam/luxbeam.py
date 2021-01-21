@@ -403,16 +403,16 @@ class Luxbeam(object):
         self.send_packet(395)
         rec_id, payload = self.recv_packet()
         assert rec_id == 595
-        enable = int(payload[0])
+        enable, = struct.unpack(">B", payload)
         return enable
 
     def set_dmd_mirror_shake(self, enable):
-        payload = enable.to_bytes(1, byteorder='big')
+        payload = struct.pack(">B", enable)
         self.send_packet(195, payload)
         self.recv_ack()
 
     def set_software_sync(self, level):
-        payload = level.to_bytes(1, byteorder='big')
+        payload = struct.pack(">B", level)
         self.send_packet(120, payload)
         self.recv_ack()
 
@@ -420,5 +420,29 @@ class Luxbeam(object):
         self.send_packet(320)
         rec_id, payload = self.recv_packet()
         assert rec_id == 520
-        level = int(payload)
+        level, = struct.unpack(">B", payload)
         return level
+
+    def set_sequencer_reg(self, reg_no, reg_val):
+        if not 0 <= reg_no <= 11:
+            raise ValueError("reg_no valid range: 0-11")
+        if not 0 <= reg_val <= 65535:
+            raise ValueError("reg_no valid range: 0-65535")
+        payload = struct.pack(">HH", reg_no, reg_val)
+        self.send_packet(122, payload)
+        self.recv_ack()
+
+    def get_sequencer_reg(self, reg_no):
+        if not 0 <= reg_no <= 11:
+            raise ValueError("reg_no valid range: 0-11")
+        payload = struct.pack(">H", reg_no)
+        self.send_packet(322, payload)
+
+        rec_id, rec_payload = self.recv_packet()
+        reg_no_r, reg_val, reg_valid = struct.unpack(">HHB", rec_payload)
+        assert reg_valid == 1
+        assert reg_no_r == reg_no
+
+        return reg_val
+
+
