@@ -18,7 +18,6 @@ def pytest_configure(config):
 
 def pytest_collection_modifyitems(config, items):
     if config.getoption("--interactive"):
-        # --runslow given in cli: do not skip slow tests
         return
     skip_interactive = pytest.mark.skip(reason="need --interactive option to run")
     for item in items:

@@ -10,7 +10,11 @@ python setup.py develop
 ```
 
 ## Test
-
+Run the test in the test folder:
 ```
 pytest test --ip="<IP address>"
+```
+Run the test with interactive tests:
+```
+pytest test --ip="<IP address>" --interactive -s
 ```
