@@ -1,26 +1,3 @@
-# LuxBeam
-## Installation
-One can install the package via setuptools:
-```
-python setup.py install
-```
-To install the package in [develop mode](https://stackoverflow.com/questions/19048732/python-setup-py-develop-vs-install) instead, use:
-```
-python setup.py develop
-```
-
-## Test
-Run the tests in the test folder:
-```
-pytest test --ip="<IP address>"
-```
-Run the interactive tests:
-```
-pytest test --ip="<IP address>" --interactive -s
-```
-
-## Example
-```python
 import Luxbeam
 from Luxbeam.sample import number_image
 
@@ -65,6 +42,3 @@ luxbeam.set_sequencer_state(Luxbeam.SEQ_CMD_RESET, Luxbeam.DISABLE)
 
 # Start the sequencer
 luxbeam.set_sequencer_state(Luxbeam.SEQ_CMD_RUN, Luxbeam.ENABLE)
-
-```
-

@@ -80,8 +80,10 @@ class Luxbeam(object):
     timeout: None or float
         If specify this number will be used for setting the timeout of the socket while communicating with the Luxbeam.
     jumbo_frame: bool
+        If true, use jumbo frame (MTU:9000).
 
     """
+
     def __init__(self, dmd_ip, inverse=False, timeout=None, jumbo_frame=False):
         self.UDP_PORT_MAIN = 52985
         self.UDP_PORT_DATA = 52986
@@ -106,10 +108,12 @@ class Luxbeam(object):
 
     @property
     def cols(self):
+        """int: number of columns on the DMD."""
         return self._cols
 
     @property
     def rows(self):
+        """int: number of rows on the DMD."""
         return self._rows
 
     def recv_ack(self):
@@ -131,6 +135,8 @@ class Luxbeam(object):
         ----------
         rec_id: int
         payload: bytes
+        use_data_port: bool
+            Send the packet to the data port (52986) instead. Used for sending the image.
         -------
         """
         tot_size = 4
@@ -168,12 +174,12 @@ class Luxbeam(object):
         -------
         dmd_type: int
             The DMD type mounted on the board. See table below for valid values.
-            DMD_TYPE_1080P_A: .95 1080p Type A
-            DMD_TYPE_XGA_A: .7 XGA Type A
-            DMD_TYPE_XGA_X: .55 XGA Type X
-            DMD_TYPE_WUXGA_A: .96 WUXGA Type A
-            DMD_TYPE_UNKNOWN: Unknown DMD connected. (blocks, cols, etc not valid in this case)
-            DMD_TYPE_NO_DMD_CONNECTED: No DMD connected. (blocks, cols, etc not valid in this case)
+            DMD_TYPE_1080P_A (0): .95 1080p Type A
+            DMD_TYPE_XGA_A (1): .7 XGA Type A
+            DMD_TYPE_XGA_X (3): .55 XGA Type X
+            DMD_TYPE_WUXGA_A (5): .96 WUXGA Type A
+            DMD_TYPE_UNKNOWN (99): Unknown DMD connected. (blocks, cols, etc not valid in this case)
+            DMD_TYPE_NO_DMD_CONNECTED (15): No DMD connected. (blocks, cols, etc not valid in this case)
         blocks: int
             The number of blocks that the DMD is divided into.
         cols: int
@@ -222,12 +228,12 @@ class Luxbeam(object):
                 time.sleep(delay)
 
     def load_image(self, inum, image, delay=None):
-        """
+        """Load an image to memory on the Luxbeam.
 
         Parameters
         ----------
         inum : int
-        image : str, numpy.ndarray
+        image : str or numpy.ndarray
         delay : float
         """
         if isinstance(image, str):
@@ -252,11 +258,11 @@ class Luxbeam(object):
 
         # Determine how many lines of the image data can be packed into each packet
         # 14 bytes for th header, so 8986 = 9000 - 14 and 1486 = 1500 - 14
-        img_data_line_num = 8986//(self._cols//8) if self.jumbo_frame else 1486//(self._cols//8)
+        img_data_line_num = 8986 // (self._cols // 8) if self.jumbo_frame else 1486 // (self._cols // 8)
 
         # Calculate how many image packets need to be sent.
         packet_num = self._rows // img_data_line_num
-        assert self._rows % img_data_line_num == 0 # TODO: implement the case that last packet has less data
+        assert self._rows % img_data_line_num == 0  # TODO: implement the case that the last packet has less data
 
         self._send_image_packets(1, packet_num, inum, image, img_data_line_num, delay=delay)
 
@@ -271,6 +277,13 @@ class Luxbeam(object):
                 self._send_image_packets(last_seq_no + 1, packet_num, inum, image, img_data_line_num, delay=delay)
 
     def load_sequence(self, sequence_file):
+        """Load an sequence file to the Luxbeam.
+
+        Parameters
+        ----------
+        sequence_file: str
+            The content of the sequence file.
+        """
         if isinstance(sequence_file, str):
             sequence_file = sequence_file.encode("ascii")
 
@@ -285,11 +298,11 @@ class Luxbeam(object):
         if residual > 0:
             tot_packet += 1
 
-        assert tot_packet==1
+        assert tot_packet == 1  # TODO: Implement supports for longer sequence file.
 
         for i in range(tot_packet):
             start = i * payload_max_size
-            if i == tot_packet - 1 and residual > 0: # last packet is not full length
+            if i == tot_packet - 1 and residual > 0:  # last packet is not full length
                 end = start + residual
             else:
                 end = start + payload_max_size
@@ -314,19 +327,20 @@ class Luxbeam(object):
         ----------
         seq_cmd : int
             Command to send. See table below for valid commands.
-                1: When enabled, the sequencer will start running from its current position.
+                SEQ_CMD_RUN (1): When enabled, the sequencer will start running from its current position.
                 When disabled, the sequencer will stop at its current position.
-                2: When enabled, the sequencer will enter its <<reset>>-state.
+                SEQ_CMD_RESET (2): When enabled, the sequencer will enter its <<reset>>-state.
                 When disabled, the sequencer will be taken out of its <<reset>>-state.
         enable : int
-            ENABLE or DISABLE
+            ENABLE (1) or DISABLE (2)
 
         Raises
         ------
         :obj:`Luxbeam.luxbeam.LuxbeamError`
-            If an invalid seq_cmd is sent in <<SetSequencerState>>, a <<ReplyAck>> with error number 10006
-            (Invalid sequence command) will be returned.
+            If an invalid seq_cmd is sent in, a LuxbeamError with error number 10006
+            (Invalid sequence command) will be raised.
         """
+
         payload = seq_cmd.to_bytes(1, byteorder='big') + enable.to_bytes(1, byteorder='big')
         self.send_packet(106, payload)
         self.recv_ack()
@@ -337,14 +351,12 @@ class Luxbeam(object):
         This mode should always be entered before powering-off the product. Note that after entering this mode, the product
         will no longer respond to any communication and must be power off and on to function normally again. The
         LEDs will alternately flash red and yellow when in shutdown-mode.
-        Returns
-        -------
         """
         self.send_packet(180)
         self.recv_ack()
 
     def get_network_settings(self):
-        """
+        """Get the network settings of the Luxbeam.
 
         Returns
         -------
@@ -352,9 +364,8 @@ class Luxbeam(object):
         subnet: str
         gateway: str
         dhcp: int
-            ENABLE: DHCP is enabled.
-            DISABLE: DHCP is DISABLED.
-
+            ENABLE (1): DHCP is enabled.
+            DISABLE (0): DHCP is disabled.
         """
         self.send_packet(308)
         rec_id, payload = self.recv_packet()
@@ -366,16 +377,16 @@ class Luxbeam(object):
         return str(ip_addr), str(subnet), str(gateway), dhcp
 
     def set_network_settings(self, ip_addr=None, subnet=None, gateway=None, dhcp=0):
-        """
+        """Set the network settings of the Luxbeam.
 
         Parameters
         ----------
-        ip_addr
-        subnet
-        gateway
-        dhcp
-        Returns
-        -------
+        ip_addr: str
+        subnet: str
+        gateway: str
+        dhcp: int
+            ENABLE (1): DHCP is enabled.
+            DISABLE (0): DHCP is disabled.
         """
         if dhcp == ENABLE:
             ip_addr, subnet, gateway = ["0.0.0.0"] * 3
@@ -388,7 +399,7 @@ class Luxbeam(object):
         self.recv_ack()
 
     def save_settings(self):
-        """This record is used to store parameters that are marked <<Permanent>> in nonvolatile memory."""
+        """This function is used to store parameters that are marked <<Permanent>> in nonvolatile memory."""
         self.send_packet(110)
         self.recv_ack()
 
@@ -427,7 +438,7 @@ class Luxbeam(object):
         if not 0 <= reg_no <= 11:
             raise ValueError("reg_no valid range: 0-11")
         if not 0 <= reg_val <= 65535:
-            raise ValueError("reg_no valid range: 0-65535")
+            raise ValueError("reg_val valid range: 0-65535")
         payload = struct.pack(">HH", reg_no, reg_val)
         self.send_packet(122, payload)
         self.recv_ack()
@@ -445,4 +456,26 @@ class Luxbeam(object):
 
         return reg_val
 
+    def set_image_type(self, image_type):
+        payload = struct.pack(">H", image_type)
+        self.send_packet(103, payload)
+        self.recv_ack()
 
+    def get_image_type(self):
+        self.send_packet(303)
+        rec_id, payload = self.recv_packet()
+        assert rec_id == 503
+        image_type = struct.unpack(">H", payload)
+        return image_type
+
+    def set_inum_size(self, rows):
+        payload = struct.pack(">H", rows)
+        self.send_packet(102, payload)
+        self.recv_ack()
+
+    def get_inum_size(self):
+        self.send_packet(302)
+        rec_id, payload = self.recv_packet()
+        assert rec_id == 502
+        rows = struct.unpack(">H", payload)
+        return rows

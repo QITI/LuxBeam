@@ -4,9 +4,14 @@ setup(
     name='Luxbeam',
     version='prerelease',
     packages=['Luxbeam'],
-    url='',
-    license='MIT',
+    url='https://github.com/QITI/Luxbeam',
+    license='',
     author='Chung-You Shih',
     author_email='c5shih@uwaterloo.ca',
-    description=''
+    install_requires=[
+        'numpy',
+        'pillow',
+    ],
+    description='A python package that implements the protocol for programming Luxbeam '
+                'DMD controller from VISITECH.'
 )
