@@ -1,4 +1,7 @@
 # LuxBeam
+A python package that implements the protocol for programming [Luxbeam DMD controller](https://www.keynotephotonics.com/dlp-chipsets/#CHIPSET-DLP9500) from [VISITECH](https://visitech.no/).
+
+
 ## Installation
 One can install the package via setuptools:
 ```
