@@ -290,6 +290,7 @@ class Luxbeam(object):
         if not isinstance(sequence_file, bytes):
             raise TypeError
 
+        # TODO this is incorrect. Need to consider 20 for ip header and 8 for udp header
         payload_max_size = 8900 if self.jumbo_frame else 1490
 
         tot_packet = len(sequence_file) // payload_max_size
