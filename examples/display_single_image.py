@@ -7,7 +7,7 @@ from Luxbeam.sample import number_image
 luxbeam = Luxbeam.Luxbeam("192.168.0.10", timeout=1) # modify the ip address if required.
 
 # Prepare the image (display 123 on the DMD)
-image = Luxbeam.sample.number_image(123, luxbeam.cols, luxbeam.rows)
+image = number_image(123, luxbeam.cols, luxbeam.rows)
 
 # Set image type to 1 (binary). (One-time Operation)
 luxbeam.set_image_type(1)
