@@ -2,6 +2,7 @@ import io
 
 __all__ = ["LuxbeamSequencer", "LuxbeamSequencerVariable", ]
 
+
 class _Counter(object):
     def __init__(self):
         self.count = 0
@@ -23,7 +24,6 @@ class LuxbeamSequencer(object):
 
         self._loop_counter = _Counter()
         self._var_counter = _Counter()
-
 
     def __str__(self):
         return self.dumps()
@@ -74,7 +74,7 @@ class LuxbeamSequencer(object):
         var = LuxbeamSequencerVariable(self, var)
         return var
 
-    def assign_var_reg(self, regno=0, var=None,  wait_for=1):
+    def assign_var_reg(self, regno=0, var=None, wait_for=1):
         if var is None:
             var = "Var{0}".format(self._var_counter())
         self.add_line("AssignVarReg", [var, str(regno), str(wait_for)])
@@ -149,7 +149,6 @@ class LuxbeamSequencerVariable(object):
             return r
         else:
             raise ValueError
-
 
 
 class LuxbeamSequencerJumpLoopIterator(object):
