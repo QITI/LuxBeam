@@ -17,6 +17,7 @@ class _Counter(object):
 
 
 class LuxbeamSequencer(object):
+    """This class is used to compose the Luxbeam sequencer code."""
     def __init__(self):
         self.command = []
         self.used_labels = []

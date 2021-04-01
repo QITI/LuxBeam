@@ -1,6 +1,9 @@
 # LuxBeam
 A python package that implements the protocol for programming [Luxbeam DMD controller](https://www.keynotephotonics.com/dlp-chipsets/#CHIPSET-DLP9500) from [VISITECH](https://visitech.no/).
-
+The `Luxbeam` class implements the control protocol of Luxbeam digital micro-mirror device (DMD) controller. 
+This tested Luxbeam 4600 controller with DLP9500UV DMD.
+In addition to equipment control, `LuxbeamSeqeuncer` class implements the support for composing sequencer code used in Luxbeam.
+This allows the user to compose the sequencer code with a pythonic style API. 
 
 ## Installation
 One can install the package via setuptools:
@@ -50,12 +53,12 @@ luxbeam.set_sequencer_state(Luxbeam.SEQ_CMD_RESET, Luxbeam.ENABLE)
 # Load the image to inum = 0.
 luxbeam.load_image(0, image)
 
-# Compose the sequence file.
+# Compose the sequencer file.
 seq = Luxbeam.LuxbeamSequencer()
 for _ in seq.jump_loop_iter():  # A while-true loop
     seq.load_global(0, 400)  # Load data from Inum (0) to DMD
     seq.trig(Luxbeam.TRIG_MODE_NEGATIVE_EDGE, Luxbeam.TRIG_SOURCE_INTERNAL, 0)  # Neg. edge internal trigger
-    seq.reset_global(40)  # # Display contents on DMD
+    seq.reset_global(40)  # Display contents on DMD
 
 # View the generated sequence file
 print(seq.dumps())

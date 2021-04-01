@@ -24,12 +24,12 @@ luxbeam.set_sequencer_state(Luxbeam.SEQ_CMD_RESET, Luxbeam.ENABLE)
 # Load the image to inum = 0.
 luxbeam.load_image(0, image)
 
-# Compose the sequence file.
+# Compose the sequencer file.
 seq = Luxbeam.LuxbeamSequencer()
 for _ in seq.jump_loop_iter():  # A while-true loop
     seq.load_global(0, 400)  # Load data from Inum (0) to DMD
     seq.trig(Luxbeam.TRIG_MODE_NEGATIVE_EDGE, Luxbeam.TRIG_SOURCE_INTERNAL, 0)  # Neg. edge internal trigger
-    seq.reset_global(40)  # # Display contents on DMD
+    seq.reset_global(40)  # Display contents on DMD
 
 # View the generated sequence file
 print(seq.dumps())

@@ -299,7 +299,9 @@ class Luxbeam(object):
         if residual > 0:
             tot_packet += 1
 
-        assert tot_packet == 1  # TODO: Implement supports for longer sequence file.
+        if tot_packet > 1:
+            raise NotImplementedError("Supports for longer sequence file hasn't been implemented!")
+            # TODO: Implement supports for longer sequence file.
 
         for i in range(tot_packet):
             start = i * payload_max_size
