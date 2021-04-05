@@ -1,9 +1,9 @@
 # LuxBeam
 A python package that implements the protocol for programming [Luxbeam DMD controller](https://www.keynotephotonics.com/dlp-chipsets/#CHIPSET-DLP9500) from [VISITECH](https://visitech.no/).
 The `Luxbeam` class implements the control protocol of Luxbeam digital micro-mirror device (DMD) controller. 
-This tested Luxbeam 4600 controller with DLP9500UV DMD.
-In addition to equipment control, `LuxbeamSeqeuncer` class implements the support for composing sequencer code used in Luxbeam.
-This allows the user to compose the sequencer code with a pythonic style API. 
+This is tested with Luxbeam 4600 controller and DLP9500UV DMD.
+In addition to equipment control from the `Luxbeam` class, the `LuxbeamSeqeuncer` class implements the support for composing sequencer code used in Luxbeam controller.
+This allows the user to compose the sequencer code using native python arithmetic operations and some of the flow controls. 
 
 ## Installation
 One can install the package via setuptools:
