@@ -3,7 +3,7 @@ import time
 import ipaddress
 import numpy as np
 import struct
-from .constants import *
+from .luxbeam_enums import *
 
 __all__ = ["Luxbeam", "LuxbeamError"]
 
@@ -70,15 +70,16 @@ class LuxbeamError(Exception):
 
 
 class Luxbeam(object):
-    """
+    """This class implements the control protocol of Luxbeam digital micro-mirror device (DMD) controller.
 
     Parameters
     ----------
     dmd_ip: str
         The IP address of the Luxbeam.
     inverse: bool
+        If true, display the inverse of the images instead.
     timeout: None or float
-        If specify this number will be used for setting the timeout of the socket while communicating with the Luxbeam.
+        If specified, this number will be used for setting the timeout of the socket while communicating with the Luxbeam.
     jumbo_frame: bool
         If true, use jumbo frame (MTU:9000).
 
