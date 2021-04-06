@@ -19,7 +19,6 @@ jobs:
       with:
         docs-folder: "doc/"
         pre-build-command: "pip install ../requirements.txt && pip install m2r2"
-        build-command: "make html && make latexpdf"
     - uses: actions/upload-artifact@v1
       with:
         name: DocumentationHTML
