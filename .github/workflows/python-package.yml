@@ -17,6 +17,7 @@ jobs:
       with:
         docs-folder: "doc/"
         pre-build-command: "pip install m2r2"
+    - run: touch doc/_build/html/.nojekyll
     - name: Deploy 🚀
       uses: JamesIves/github-pages-deploy-action@4.1.1
       with:
