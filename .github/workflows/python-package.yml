@@ -6,8 +6,6 @@ name: Python package
 on:
   push:
     branches: [ main ]
-  pull_request:
-    branches: [ main ]
 
 jobs:
   build:
@@ -19,7 +17,12 @@ jobs:
       with:
         docs-folder: "doc/"
         pre-build-command: "pip install m2r2"
-    - uses: actions/upload-artifact@v1
+    - name: Deploy 🚀
+      uses: JamesIves/github-pages-deploy-action@4.1.1
       with:
-        name: DocumentationHTML
-        path: doc/_build/html/
+        branch: gh-pages # The branch the action should deploy to.
+        folder: doc/_build/html/ # The folder the action should deploy.
+    #- uses: actions/upload-artifact@v1
+    #  with:
+    #    name: DocumentationHTML
+    #    path: doc/_build/html/
