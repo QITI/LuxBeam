@@ -17,12 +17,12 @@ jobs:
       with:
         docs-folder: "doc/"
         pre-build-command: "pip install m2r2"
-    - run: touch doc/_build/html/.nojekyll
     - name: Deploy 🚀
       uses: JamesIves/github-pages-deploy-action@4.1.1
       with:
         branch: gh-pages # The branch the action should deploy to.
         folder: doc/_build/html/ # The folder the action should deploy.
+        nojekyll: true
     #- uses: actions/upload-artifact@v1
     #  with:
     #    name: DocumentationHTML
