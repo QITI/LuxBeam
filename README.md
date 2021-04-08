@@ -1,4 +1,6 @@
 # LuxBeam Introduction
+[![Build Documentation HTML](https://github.com/QITI/Luxbeam/actions/workflows/python-package.yml/badge.svg)](https://github.com/QITI/Luxbeam/actions/workflows/python-package.yml)
+
 A python package that implements the protocol for programming [Luxbeam DMD controller](https://www.keynotephotonics.com/dlp-chipsets/#CHIPSET-DLP9500) from [VISITECH](https://visitech.no/).
 The `Luxbeam` class implements the control protocol of Luxbeam digital micro-mirror device (DMD) controller. 
 This is tested with Luxbeam 4600 controller and DLP9500UV DMD.
