@@ -130,7 +130,7 @@ class Luxbeam(object):
                 raise LuxbeamError(error_code)
 
     def send_packet(self, rec_id, payload=None, use_data_port=False):
-        """
+        """Send the packet to the Luxbeam.
 
         Parameters
         ----------
@@ -138,7 +138,6 @@ class Luxbeam(object):
         payload: bytes
         use_data_port: bool
             Send the packet to the data port (52986) instead. Used for sending the image.
-        -------
         """
         tot_size = 4
         if payload:
@@ -175,12 +174,12 @@ class Luxbeam(object):
         -------
         dmd_type: int
             The DMD type mounted on the board. See table below for valid values.
-            DMD_TYPE_1080P_A (0): .95 1080p Type A
-            DMD_TYPE_XGA_A (1): .7 XGA Type A
-            DMD_TYPE_XGA_X (3): .55 XGA Type X
-            DMD_TYPE_WUXGA_A (5): .96 WUXGA Type A
-            DMD_TYPE_UNKNOWN (99): Unknown DMD connected. (blocks, cols, etc not valid in this case)
-            DMD_TYPE_NO_DMD_CONNECTED (15): No DMD connected. (blocks, cols, etc not valid in this case)
+                * DMD_TYPE_1080P_A (0): .95 1080p Type A
+                * DMD_TYPE_XGA_A (1): .7 XGA Type A
+                * DMD_TYPE_XGA_X (3): .55 XGA Type X
+                * DMD_TYPE_WUXGA_A (5): .96 WUXGA Type A
+                * DMD_TYPE_UNKNOWN (99): Unknown DMD connected. (blocks, cols, etc not valid in this case)
+                * DMD_TYPE_NO_DMD_CONNECTED (15): No DMD connected. (blocks, cols, etc not valid in this case)
         blocks: int
             The number of blocks that the DMD is divided into.
         cols: int
@@ -284,6 +283,10 @@ class Luxbeam(object):
         ----------
         sequence_file: str
             The content of the sequence file.
+
+        See Also
+        --------
+        :obj:`Luxbeam.sequencer.LuxbeamSequencer`
         """
         if isinstance(sequence_file, str):
             sequence_file = sequence_file.encode("ascii")
@@ -368,8 +371,8 @@ class Luxbeam(object):
         subnet: str
         gateway: str
         dhcp: int
-            ENABLE (1): DHCP is enabled.
-            DISABLE (0): DHCP is disabled.
+            * ENABLE (1): DHCP is enabled.
+            * DISABLE (0): DHCP is disabled.
         """
         self.send_packet(308)
         rec_id, payload = self.recv_packet()
@@ -389,8 +392,8 @@ class Luxbeam(object):
         subnet: str
         gateway: str
         dhcp: int
-            ENABLE (1): DHCP is enabled.
-            DISABLE (0): DHCP is disabled.
+            * ENABLE (1): DHCP is enabled.
+            * DISABLE (0): DHCP is disabled.
         """
         if dhcp == ENABLE:
             ip_addr, subnet, gateway = ["0.0.0.0"] * 3
