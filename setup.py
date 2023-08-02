@@ -13,5 +13,7 @@ setup(
         'pillow',
     ],
     description='A python package that implements the protocol for programming Luxbeam '
-                'DMD controller from VISITECH.'
+                'DMD controller from VISITECH.',
+    long_description='A python package that implements the protocol for programming Luxbeam '
+                'DMD controller from VISITECH.',
 )
