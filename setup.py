@@ -6,7 +6,7 @@ long_description = (this_directory / "README.md").read_text()
 
 setup(
     name='Luxbeam',
-    version='v0.1.0',
+    version='v0.1.1',
     packages=['Luxbeam'],
     url='https://github.com/QITI/Luxbeam',
     license='',
