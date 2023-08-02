@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name='Luxbeam',
-    version='prerelease',
+    version='v0.1.0',
     packages=['Luxbeam'],
     url='https://github.com/QITI/Luxbeam',
     license='',
