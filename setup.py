@@ -1,5 +1,8 @@
 from setuptools import setup
 
+this_directory = Path(__file__).parent
+long_description = (this_directory / "README.md").read_text()
+
 setup(
     name='Luxbeam',
     version='v0.1.0',
@@ -14,6 +17,6 @@ setup(
     ],
     description='A python package that implements the protocol for programming Luxbeam '
                 'DMD controller from VISITECH.',
-    long_description='A python package that implements the protocol for programming Luxbeam '
-                'DMD controller from VISITECH.',
+    long_description=long_description,
+    long_description_content_type='text/markdown'
 )
