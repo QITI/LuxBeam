@@ -1,1 +1,1 @@
-__version__ = "prealpha"
+__version__ = "v0.1.1"
