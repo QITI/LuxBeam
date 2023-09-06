@@ -10,13 +10,13 @@ In addition to equipment control from the `Luxbeam` class, the `LuxbeamSeqeuncer
 This allows the user to compose the sequencer code using native python arithmetic operations and some of the flow controls. 
 
 ## Installation
-One can install the package via setuptools:
+Luxbeam can be installed from PyPI via:
 ```
-python setup.py install
+pip install Luxbeam
 ```
-To install the package in [develop mode](https://stackoverflow.com/questions/19048732/python-setup-py-develop-vs-install) instead, use:
+One can also clone the repository to install it in the develop mode:
 ```
-python setup.py develop
+pip install -e .
 ```
 
 ## Test
