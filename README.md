@@ -1,5 +1,5 @@
 # Luxbeam Introduction
-[![Build Documentation HTML](https://github.com/QITI/Luxbeam/actions/workflows/python-package.yml/badge.svg)](https://github.com/QITI/Luxbeam/actions/workflows/python-package.yml)
+[![Build Documentation HTML](https://github.com/QITI/Luxbeam/actions/workflows/sphinx.yml/badge.svg)](https://github.com/QITI/Luxbeam/actions/workflows/sphinx.yml)
 - Documentation: https://qiti.github.io/Luxbeam/
 - PyPI: https://pypi.org/project/Luxbeam/
 
