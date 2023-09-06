@@ -12,7 +12,22 @@
 #
 import os
 import sys
+from sphinx_pyproject import SphinxConfig
+
 sys.path.insert(0, os.path.abspath('../'))
+
+
+# # -- Project information -----------------------------------------------------
+
+config = SphinxConfig("../pyproject.toml", globalns=globals())
+
+project = "Luxbeam"
+author
+version
+description
+copyright = '2023, Chung-You (Gilbert) Shih'
+release = version
+
 
 
 # -- Project information -----------------------------------------------------
